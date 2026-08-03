@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { tools } from "./tools";
 import Sidebar from "./Sidebar";
+import DomainLookup from "./DomainLookup";
 import InvestigationNotes from "./InvestigationNotes";
 
 export default function Home() {
@@ -74,7 +75,6 @@ export default function Home() {
             OSINT Research
           </p>
 
-          {/* Stats */}
           <div className="grid md:grid-cols-4 gap-4 mb-8">
             <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Total Tools</h3>
@@ -109,7 +109,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Search */}
           <input
             value={search}
             onChange={(e) =>
@@ -119,7 +118,6 @@ export default function Home() {
             className="w-full p-3 rounded bg-zinc-900 border border-zinc-800 mb-4"
           />
 
-          {/* Category Filters */}
           <div className="flex flex-wrap gap-2 mb-8">
             {categories.map((category) => (
               <button
@@ -138,7 +136,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Favorites */}
           {favorites.length > 0 && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-4">
@@ -158,7 +155,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Tools Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tool) => (
               <div
@@ -202,7 +198,10 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Investigation Workspace */}
+          <div className="mt-12">
+            <DomainLookup />
+          </div>
+
           <div className="mt-12">
             <InvestigationNotes />
           </div>
