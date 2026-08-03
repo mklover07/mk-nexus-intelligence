@@ -8,6 +8,8 @@ import InvestigationNotes from "./InvestigationNotes";
 export default function Home() {
   const [search, setSearch] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
 
   useEffect(() => {
     const saved = localStorage.getItem("favorites");
@@ -36,25 +38,32 @@ export default function Home() {
     );
   };
 
-  const filtered = tools.filter(
-    (tool) =>
+  const categories = [
+    "All",
+    ...new Set(tools.map((tool) => tool.category)),
+  ];
+
+  const filtered = tools.filter((tool) => {
+    const matchesSearch =
       tool.name
         .toLowerCase()
         .includes(search.toLowerCase()) ||
       tool.category
         .toLowerCase()
-        .includes(search.toLowerCase())
-  );
+        .includes(search.toLowerCase());
 
-  const categories = [
-    ...new Set(filtered.map((tool) => tool.category)),
-  ];
+    const matchesCategory =
+      selectedCategory === "All" ||
+      tool.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="flex min-h-screen bg-black text-white">
       <Sidebar />
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-5xl font-bold mb-2">
             MK Nexus Intelligence
@@ -66,31 +75,33 @@ export default function Home() {
           </p>
 
           {/* Stats */}
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-zinc-900 p-4 rounded">
+          <div className="grid md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Total Tools</h3>
               <p className="text-3xl font-bold">
                 {tools.length}
               </p>
             </div>
 
-            <div className="bg-zinc-900 p-4 rounded">
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Categories</h3>
               <p className="text-3xl font-bold">
-                {new Set(
-                  tools.map((t) => t.category)
-                ).size}
+                {
+                  new Set(
+                    tools.map((t) => t.category)
+                  ).size
+                }
               </p>
             </div>
 
-            <div className="bg-zinc-900 p-4 rounded">
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Favorites</h3>
               <p className="text-3xl font-bold">
                 {favorites.length}
               </p>
             </div>
 
-            <div className="bg-zinc-900 p-4 rounded">
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Brand</h3>
               <p className="font-bold">
                 MK Global Nexus
@@ -104,9 +115,28 @@ export default function Home() {
             onChange={(e) =>
               setSearch(e.target.value)
             }
-            placeholder="Search tools..."
-            className="w-full p-3 rounded bg-zinc-900 border border-zinc-800 mb-6"
+            placeholder="Search Tools..."
+            className="w-full p-3 rounded bg-zinc-900 border border-zinc-800 mb-4"
           />
+
+          {/* Category Filters */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() =>
+                  setSelectedCategory(category)
+                }
+                className={`px-4 py-2 rounded ${
+                  selectedCategory === category
+                    ? "bg-blue-600"
+                    : "bg-zinc-800"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
 
           {/* Favorites */}
           {favorites.length > 0 && (
@@ -128,60 +158,54 @@ export default function Home() {
             </div>
           )}
 
-          {/* Categories */}
-          {categories.map((category) => (
-            <div key={category} className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">
-                {category}
-              </h2>
+          {/* Tools Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((tool) => (
+              <div
+                key={tool.name}
+                className="bg-zinc-900 border border-zinc-800 p-5 rounded"
+              >
+                <h3 className="text-lg font-bold">
+                  {tool.name}
+                </h3>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filtered
-                  .filter(
-                    (tool) =>
-                      tool.category === category
-                  )
-                  .map((tool) => (
-                    <div
-                      key={tool.name}
-                      className="bg-zinc-900 border border-zinc-800 p-4 rounded"
-                    >
-                      <h3 className="font-bold text-lg">
-                        {tool.name}
-                      </h3>
+                <p className="text-blue-400 text-sm mt-1">
+                  {tool.category}
+                </p>
 
-                      <p className="text-blue-400 text-sm mt-1">
-                        {tool.category}
-                      </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  {tool.description}
+                </p>
 
-                      <p className="text-gray-400 text-sm mt-2">
-                        {tool.description}
-                      </p>
+                <div className="flex gap-2 mt-4">
+                  <a
+                    href={tool.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 px-4 py-2 rounded"
+                  >
+                    Open Tool
+                  </a>
 
-                      <a
-                        href={tool.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mt-4 px-4 py-2 bg-blue-600 rounded"
-                      >
-                        Open Tool
-                      </a>
-
-                      <button
-                        onClick={() =>
-                          toggleFavorite(tool.name)
-                        }
-                        className="block mt-3 text-yellow-400"
-                      >
-                        {favorites.includes(tool.name)
-                          ? "⭐ Favorited"
-                          : "☆ Add Favorite"}
-                      </button>
-                    </div>
-                  ))}
+                  <button
+                    onClick={() =>
+                      toggleFavorite(tool.name)
+                    }
+                    className="bg-zinc-800 px-4 py-2 rounded"
+                  >
+                    {favorites.includes(tool.name)
+                      ? "⭐"
+                      : "☆"}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Investigation Workspace */}
+          <div className="mt-12">
+            <InvestigationNotes />
+          </div>
 
           <footer className="mt-16 text-center text-gray-500">
             Powered by MK Global Nexus © 2026
