@@ -6,6 +6,7 @@ import Sidebar from "./Sidebar";
 import DomainLookup from "./DomainLookup";
 import RecentTools from "./RecentTools";
 import InvestigationNotes from "./InvestigationNotes";
+import EmailIntelligence from "./EmailIntelligence";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -13,11 +14,36 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] =
     useState("All");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("favorites");
+  const [openCases, setOpenCases] = useState(0);
+  const [closedCases, setClosedCases] = useState(0);
 
-    if (saved) {
-      setFavorites(JSON.parse(saved));
+  useEffect(() => {
+    const savedFavorites =
+      localStorage.getItem("favorites");
+
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+
+    const savedCases =
+      localStorage.getItem("investigation_cases");
+
+    if (savedCases) {
+      const cases = JSON.parse(savedCases);
+
+      setOpenCases(
+        cases.filter(
+          (c: { status: string }) =>
+            c.status === "Open"
+        ).length
+      );
+
+      setClosedCases(
+        cases.filter(
+          (c: { status: string }) =>
+            c.status === "Closed"
+        ).length
+      );
     }
   }, []);
 
@@ -94,8 +120,7 @@ export default function Home() {
             OSINT Research
           </p>
 
-          {/* Stats */}
-          <div className="grid md:grid-cols-4 gap-4 mb-8">
+          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
             <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
               <h3>Total Tools</h3>
               <p className="text-3xl font-bold">
@@ -127,9 +152,22 @@ export default function Home() {
                 MK Global Nexus
               </p>
             </div>
+
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+              <h3>Open Cases</h3>
+              <p className="text-3xl font-bold">
+                {openCases}
+              </p>
+            </div>
+
+            <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+              <h3>Closed Cases</h3>
+              <p className="text-3xl font-bold">
+                {closedCases}
+              </p>
+            </div>
           </div>
 
-          {/* Search */}
           <input
             value={search}
             onChange={(e) =>
@@ -139,7 +177,6 @@ export default function Home() {
             className="w-full p-3 rounded bg-zinc-900 border border-zinc-800 mb-4"
           />
 
-          {/* Category Filters */}
           <div className="flex flex-wrap gap-2 mb-8">
             {categories.map((category) => (
               <button
@@ -158,7 +195,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Favorites */}
           {favorites.length > 0 && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold mb-4">
@@ -178,7 +214,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Tools */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((tool) => (
               <div
@@ -225,17 +260,18 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Recent Tools */}
           <div className="mt-12">
             <RecentTools />
           </div>
 
-          {/* Domain Lookup */}
           <div className="mt-12">
             <DomainLookup />
           </div>
 
-          {/* Investigation Workspace */}
+          <div className="mt-12">
+            <EmailIntelligence />
+          </div>
+
           <div className="mt-12">
             <InvestigationNotes />
           </div>
