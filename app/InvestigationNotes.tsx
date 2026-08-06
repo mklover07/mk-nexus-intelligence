@@ -14,6 +14,7 @@ interface CaseNote {
   investigator: string;
   priority: CasePriority;
   createdAt: string;
+  updatedAt: string;
   status: CaseStatus;
 }
 
@@ -23,9 +24,13 @@ export default function InvestigationNotes() {
   const [title, setTitle] = useState("");
   const [target, setTarget] = useState("");
   const [notes, setNotes] = useState("");
-  const [investigator, setInvestigator] = useState("");
+  const [investigator, setInvestigator] =
+    useState("Manoj Meena");
+
   const [priority, setPriority] =
     useState<CasePriority>("Medium");
+
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem(
@@ -50,18 +55,27 @@ export default function InvestigationNotes() {
     );
   };
 
+  const generateCaseId = () => {
+    return `MK-2026-${String(
+      cases.length + 1
+    ).padStart(4, "0")}`;
+  };
+
   const addCase = () => {
     if (!title.trim() || !target.trim()) return;
 
+    const now = new Date().toLocaleString();
+
     const newCase: CaseNote = {
       id: Date.now(),
-      caseId: `CASE-${Date.now()}`,
+      caseId: generateCaseId(),
       title,
       target,
       notes,
       investigator,
       priority,
-      createdAt: new Date().toLocaleString(),
+      createdAt: now,
+      updatedAt: now,
       status: "Open",
     };
 
@@ -70,7 +84,6 @@ export default function InvestigationNotes() {
     setTitle("");
     setTarget("");
     setNotes("");
-    setInvestigator("");
     setPriority("Medium");
   };
 
@@ -80,6 +93,8 @@ export default function InvestigationNotes() {
         return {
           ...item,
           status: "Closed" as CaseStatus,
+          updatedAt:
+            new Date().toLocaleString(),
         };
       }
 
@@ -97,6 +112,60 @@ export default function InvestigationNotes() {
     saveCases(updated);
   };
 
+  const exportJSON = () => {
+    const blob = new Blob(
+      [JSON.stringify(cases, null, 2)],
+      {
+        type: "application/json",
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+    a.download =
+      "investigation_cases.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const exportCSV = () => {
+    const headers =
+      "CaseID,Title,Target,Status,Priority,Investigator\n";
+
+    const rows = cases
+      .map(
+        (c) =>
+          `"${c.caseId}","${c.title}","${c.target}","${c.status}","${c.priority}","${c.investigator}"`
+      )
+      .join("\n");
+
+    const blob = new Blob(
+      [headers + rows],
+      {
+        type: "text/csv",
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+    a.download =
+      "investigation_cases.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
   const openCases = cases.filter(
     (c) => c.status === "Open"
   ).length;
@@ -105,14 +174,43 @@ export default function InvestigationNotes() {
     (c) => c.status === "Closed"
   ).length;
 
-  const badgeColor = (priority: CasePriority) => {
+  const highPriorityCases =
+    cases.filter(
+      (c) => c.priority === "High"
+    ).length;
+
+  const filteredCases = cases.filter(
+    (c) =>
+      c.title
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        ) ||
+      c.target
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        ) ||
+      c.caseId
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+  );
+
+  const badgeColor = (
+    priority: CasePriority
+  ) => {
     switch (priority) {
       case "High":
         return "bg-red-600";
+
       case "Medium":
         return "bg-yellow-600";
+
       case "Low":
         return "bg-green-600";
+
       default:
         return "bg-gray-600";
     }
@@ -124,7 +222,7 @@ export default function InvestigationNotes() {
         Investigation Workspace
       </h2>
 
-      <div className="grid md:grid-cols-3 gap-4 mb-6">
+      <div className="grid md:grid-cols-4 gap-4 mb-6">
         <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
           <h3>Open Cases</h3>
           <p className="text-3xl font-bold">
@@ -145,12 +243,35 @@ export default function InvestigationNotes() {
             {cases.length}
           </p>
         </div>
+
+        <div className="bg-zinc-900 p-4 rounded border border-zinc-800">
+          <h3>High Priority</h3>
+          <p className="text-3xl font-bold">
+            {highPriorityCases}
+          </p>
+        </div>
       </div>
 
       <div className="bg-zinc-900 p-6 rounded border border-zinc-800 mb-6">
         <h3 className="text-xl font-bold mb-4">
           Create Investigation Case
         </h3>
+
+        <div className="flex gap-3 mb-4">
+          <button
+            onClick={exportJSON}
+            className="bg-purple-600 px-4 py-2 rounded"
+          >
+            Export JSON
+          </button>
+
+          <button
+            onClick={exportCSV}
+            className="bg-orange-600 px-4 py-2 rounded"
+          >
+            Export CSV
+          </button>
+        </div>
 
         <div className="grid gap-3">
           <input
@@ -174,7 +295,9 @@ export default function InvestigationNotes() {
           <input
             value={investigator}
             onChange={(e) =>
-              setInvestigator(e.target.value)
+              setInvestigator(
+                e.target.value
+              )
             }
             placeholder="Investigator"
             className="p-3 rounded bg-zinc-800"
@@ -184,16 +307,23 @@ export default function InvestigationNotes() {
             value={priority}
             onChange={(e) =>
               setPriority(
-                e.target.value as CasePriority
+                e.target
+                  .value as CasePriority
               )
             }
             className="p-3 rounded bg-zinc-800"
           >
-            <option value="High">High</option>
+            <option value="High">
+              High
+            </option>
+
             <option value="Medium">
               Medium
             </option>
-            <option value="Low">Low</option>
+
+            <option value="Low">
+              Low
+            </option>
           </select>
 
           <textarea
@@ -215,8 +345,17 @@ export default function InvestigationNotes() {
         </div>
       </div>
 
+      <input
+        value={search}
+        onChange={(e) =>
+          setSearch(e.target.value)
+        }
+        placeholder="Search Cases..."
+        className="w-full p-3 rounded bg-zinc-900 border border-zinc-800 mb-6"
+      />
+
       <div className="space-y-4">
-        {cases.map((item) => (
+        {filteredCases.map((item) => (
           <div
             key={item.id}
             className="bg-zinc-900 border border-zinc-800 p-5 rounded"
@@ -246,8 +385,10 @@ export default function InvestigationNotes() {
             </p>
 
             <p>
-              <strong>Investigator:</strong>{" "}
-              {item.investigator || "N/A"}
+              <strong>
+                Investigator:
+              </strong>{" "}
+              {item.investigator}
             </p>
 
             <p>
@@ -260,15 +401,23 @@ export default function InvestigationNotes() {
               {item.createdAt}
             </p>
 
+            <p>
+              <strong>Updated:</strong>{" "}
+              {item.updatedAt}
+            </p>
+
             <p className="mt-3">
               {item.notes}
             </p>
 
             <div className="flex gap-3 mt-4">
-              {item.status === "Open" && (
+              {item.status ===
+                "Open" && (
                 <button
                   onClick={() =>
-                    closeCase(item.id)
+                    closeCase(
+                      item.id
+                    )
                   }
                   className="bg-green-600 px-4 py-2 rounded"
                 >
@@ -278,7 +427,9 @@ export default function InvestigationNotes() {
 
               <button
                 onClick={() =>
-                  deleteCase(item.id)
+                  deleteCase(
+                    item.id
+                  )
                 }
                 className="bg-red-600 px-4 py-2 rounded"
               >
@@ -287,6 +438,13 @@ export default function InvestigationNotes() {
             </div>
           </div>
         ))}
+
+        {filteredCases.length ===
+          0 && (
+          <div className="bg-zinc-900 border border-zinc-800 p-5 rounded text-center text-gray-400">
+            No cases found
+          </div>
+        )}
       </div>
     </div>
   );

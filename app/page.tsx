@@ -2,11 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { tools } from "./tools";
+
 import Sidebar from "./Sidebar";
-import DomainLookup from "./DomainLookup";
 import RecentTools from "./RecentTools";
-import InvestigationNotes from "./InvestigationNotes";
+import DomainLookup from "./DomainLookup";
 import EmailIntelligence from "./EmailIntelligence";
+import IPIntelligence from "./IPIntelligence";
+import ThreatIntelligence from "./ThreatIntelligence";
+import RiskDashboard from "./RiskDashboard";
+import IOCTracker from "./IOCTracker";
+import CaseManagement from "./CaseManagement";
+import CaseTimeline from "./CaseTimeline";
+import EvidenceVault from "./EvidenceVault";
+import MobileIntelligence from "./MobileIntelligence";
+import InvestigationNotes from "./InvestigationNotes";
+import DashboardStats from "./DashboardStats";
+import ReportGenerator from "./ReportGenerator";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -26,7 +37,7 @@ export default function Home() {
     }
 
     const savedCases =
-      localStorage.getItem("investigation_cases");
+      localStorage.getItem("mk_cases");
 
     if (savedCases) {
       const cases = JSON.parse(savedCases);
@@ -111,7 +122,8 @@ export default function Home() {
 
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-5xl font-bold mb-2">
+
+        </div>          <h1 className="text-5xl font-bold mb-2">
             MK Nexus Intelligence
           </h1>
 
@@ -166,6 +178,10 @@ export default function Home() {
                 {closedCases}
               </p>
             </div>
+          </div>
+
+          <div className="mb-12">
+            <DashboardStats />
           </div>
 
           <input
@@ -258,9 +274,7 @@ export default function Home() {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="mt-12">
+          </div>          <div className="mt-12">
             <RecentTools />
           </div>
 
@@ -273,12 +287,60 @@ export default function Home() {
           </div>
 
           <div className="mt-12">
+            <IPIntelligence />
+          </div>
+
+          <div className="mt-12">
+            <ThreatIntelligence />
+          </div>
+
+          <div className="mt-12">
+            <RiskDashboard />
+          </div>
+
+          <div className="mt-12">
+            <IOCTracker />
+          </div>
+
+          <div className="mt-12">
+            <CaseManagement />
+          </div>
+
+          <div className="mt-12">
+            <CaseTimeline />
+          </div>
+
+          <div className="mt-12">
+            <EvidenceVault />
+          </div>
+
+          <div className="mt-12">
+            <MobileIntelligence />
+          </div>
+
+          <div className="mt-12">
             <InvestigationNotes />
           </div>
 
-          <footer className="mt-16 text-center text-gray-500">
-            Powered by MK Global Nexus © 2026
+          <div className="mt-12">
+            <ReportGenerator />
+          
+          <footer className="mt-16 border-t border-zinc-800 pt-6 text-center text-gray-500">
+            <p className="font-semibold">
+              MK Nexus Intelligence Platform
+            </p>
+
+            <p className="mt-2">
+              Powered by MK Global Nexus © 2026
+            </p>
+
+            <p className="text-xs mt-3">
+              Cyber Intelligence | Digital Investigations |
+              OSINT Research | Threat Intelligence |
+              Digital Forensics
+            </p>
           </footer>
+
         </div>
       </main>
     </div>

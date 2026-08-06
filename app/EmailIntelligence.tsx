@@ -26,11 +26,12 @@ export default function EmailIntelligence() {
       </h2>
 
       <input
+        type="email"
         value={email}
         onChange={(e) =>
           setEmail(e.target.value)
         }
-        placeholder="Enter email address"
+        placeholder="Enter Email Address"
         className="w-full p-3 rounded bg-zinc-800 border border-zinc-700 mb-4"
       />
 
@@ -38,7 +39,15 @@ export default function EmailIntelligence() {
         <div className="space-y-3">
           <div>
             <strong>Status:</strong>{" "}
-            {valid ? "Valid Email" : "Invalid Email"}
+            {valid ? (
+              <span className="text-green-400">
+                Valid Email
+              </span>
+            ) : (
+              <span className="text-red-400">
+                Invalid Email
+              </span>
+            )}
           </div>
 
           {valid && (
@@ -53,19 +62,21 @@ export default function EmailIntelligence() {
                 {domain}
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-3">
+              <div className="grid md:grid-cols-2 gap-2 pt-3">
                 <a
                   href={`https://who.is/whois/${domain}`}
                   target="_blank"
-                  className="bg-blue-600 px-4 py-2 rounded"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 px-4 py-2 rounded text-center"
                 >
-                  WHOIS
+                  WHOIS Lookup
                 </a>
 
                 <a
                   href={`https://mxtoolbox.com/SuperTool.aspx?action=mx:${domain}`}
                   target="_blank"
-                  className="bg-green-600 px-4 py-2 rounded"
+                  rel="noopener noreferrer"
+                  className="bg-green-600 px-4 py-2 rounded text-center"
                 >
                   MXToolbox
                 </a>
@@ -73,17 +84,37 @@ export default function EmailIntelligence() {
                 <a
                   href={`https://hunter.io/search/${domain}`}
                   target="_blank"
-                  className="bg-purple-600 px-4 py-2 rounded"
+                  rel="noopener noreferrer"
+                  className="bg-purple-600 px-4 py-2 rounded text-center"
                 >
-                  Hunter
+                  Hunter.io
                 </a>
 
                 <a
-                  href={`https://haveibeenpwned.com`}
+                  href="https://haveibeenpwned.com"
                   target="_blank"
-                  className="bg-red-600 px-4 py-2 rounded"
+                  rel="noopener noreferrer"
+                  className="bg-red-600 px-4 py-2 rounded text-center"
                 >
-                  HIBP
+                  Have I Been Pwned
+                </a>
+
+                <a
+                  href={`https://emailrep.io/${email}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-yellow-600 px-4 py-2 rounded text-center"
+                >
+                  EmailRep
+                </a>
+
+                <a
+                  href={`https://dehashed.com/search?query=${email}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-orange-600 px-4 py-2 rounded text-center"
+                >
+                  DeHashed
                 </a>
               </div>
             </>
